@@ -16,6 +16,8 @@ char* novosComandos(){
     return novosComandos;
 }
 
+extern void imprimeJacare();
+
 int main(){
     while(1){
         printf("vsh> ");
@@ -23,6 +25,7 @@ int main(){
         char* comandos = novosComandos();
 
         printf("%s\n", comandos);
+        imprimeJacare();
     }
 
     return 0;
