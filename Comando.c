@@ -44,13 +44,17 @@ char* obtemArgumento(char* comando){
     return novoArgumento;
 }
 
-void obtemArgumentos(Comando c,char* comando){
-
-    char* aux = strtok(comando," ");
+void preencheArgumentos(Comando* c, char* comando){
+    char* buffer;
+    char* aux = strtok_r(comando," ",&buffer);
 
     while(aux != NULL){
+        c->argumentos[c->numArgumentos] = strdup(aux);
 
+        aux = strtok_r(NULL," ",&buffer);
+        c->numArgumentos++;
     }
 
-
+    c->argumentos[c->numArgumentos] = NULL;
+    c->numArgumentos++;
 }
