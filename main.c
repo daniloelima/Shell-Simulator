@@ -16,16 +16,22 @@ char* novosComandos(){
     return novosComandos;
 }
 
-extern void imprimeJacare();
-
 int main(){
     while(1){
         printf("vsh> ");
 
         char* comandos = novosComandos();
+        char* comando = strtok(comandos, "|");
 
-        printf("%s\n", comandos);
-        imprimeJacare();
+        while(comando != NULL){
+            char** argumentosComandos = obtemArgumentos(comando);
+
+            for(int i = 0; i < )
+
+            comando = strtok(NULL, "|");
+        }
+
+        return 0;
     }
 
     return 0;
