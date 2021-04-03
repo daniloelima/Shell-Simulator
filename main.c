@@ -17,6 +17,7 @@ char* novosComandos(){
 }
 
 int main(){
+
     while(1){
         printf("vsh> ");
 
