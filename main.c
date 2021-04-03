@@ -13,6 +13,8 @@ char* novosComandos(){
     novosComandos = strdup(strAux);
     novosComandos[strlen(novosComandos) - 1] = '\0';
 
+    printf("Comandos: %s\n", novosComandos);
+
     return novosComandos;
 }
 
