@@ -15,33 +15,15 @@ struct comando{
 Comando* inicializaComando(){
     Comando* novoComando = (Comando*) malloc(sizeof(Comando));
 
-    novoComando->argumentos = (char**) malloc(sizeof(char**)*30);
+    novoComando->argumentos = (char**) malloc(sizeof(char*)*30);
 
     for(int i = 0; i < 30; i++){
-        novoComando->argumentos[i] = (char*) malloc(sizeof(char*)*50);
+        novoComando->argumentos[i] = (char*) malloc(sizeof(char)*50);
     }
 
     novoComando->numArgumentos = 0;
 
     return novoComando;
-}
-
-char* obtemArgumento(char* comando){
-    char* novoArgumento = malloc(sizeof(char) * 20);
-
-    int i = 0, j = 0;
-    if(comando[0] == ' '){
-        while(comando[i] == ' ') i++;
-    }
-
-    while(comando[i] != ' ') {
-        novoArgumento[j] = comando[i];
-        i++;
-        j++;
-    }
-    novoArgumento[j] = '\0';
-
-    return novoArgumento;
 }
 
 void preencheArgumentos(Comando* c, char* comando){

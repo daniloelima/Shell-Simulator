@@ -3,6 +3,10 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include "Comando.h"
+
+
+extern void imprimeJacare();
 
 char* novosComandos(){
     char strAux[100];
@@ -24,14 +28,26 @@ int main(){
         printf("vsh> ");
 
         char* comandos = novosComandos();
-        char* comando = strtok(comandos, "|");
+        char* str = strtok(comandos, "|");
 
-        while(comando != NULL){
-            char** argumentosComandos = obtemArgumentos(comando);
+        while(str != NULL){
+            Comando* comando = inicializaComando();
 
-            for(int i = 0; i < )
+            preencheArgumentos(comando, str);
 
-            comando = strtok(NULL, "|");
+            imprimeComando(comando);
+
+            char** args = retornaArgumentos(comando);
+
+            int pid = fork();
+            if(pid == 0){
+                execvp(args[0], args);
+            }else{
+                liberaComando(comando);
+                str = strtok(NULL, "|");
+                printf("str: %s", str);
+            }
+            wait(NULL);
         }
 
         return 0;
