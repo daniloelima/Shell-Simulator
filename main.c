@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include "Comando.h"
-
+#include "VSH.h"
 
 extern void imprimeJacare();
 
