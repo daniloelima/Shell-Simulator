@@ -13,7 +13,6 @@
 extern void imprimeJacare();
 
 int main(){
-
     while(1){
         printf("vsh> ");
         VSH* vsh = initVSH();
