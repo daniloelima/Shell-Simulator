@@ -54,7 +54,7 @@ void imprimeComando(Comando * c){
         printf("%s ", c->argumentos[i]);
     }
 
-    printf("\n");
+    printf("Numero de argumentos : %d\n",c->numArgumentos);
 }
 
 void liberaComando(Comando* c){
