@@ -18,7 +18,6 @@ int main(){
         VSH* vsh = initVSH();
         leComandos(vsh);
         executaComandos(vsh);
-        printf("\n");
     }
 
     return 0;

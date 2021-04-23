@@ -76,6 +76,7 @@ void executaComandos(VSH* vsh){
         }
 
         for(int i = 0 ; i < vsh->numComandos; i++){
+            char** args = retornaArgumentos(vsh->comandos[i]);
             int pid = fork();
             if(pid == 0){
                 for(int j = 0; j < tampipe; j++){
