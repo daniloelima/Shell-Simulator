@@ -70,7 +70,7 @@ void executaComandos(VSH* vsh){
         int fd[tampipe][2];
         for(int i = 0; i < vsh->numComandos - 1;i++){
             if(pipe(fd[i]) != 0){
-                perror("Erro ao abrir pipe!");
+                perror("Erro ao abrir pipe!\n");
                 return;
             }
         }
@@ -97,6 +97,11 @@ void executaComandos(VSH* vsh){
 
                 execvp(args[0], args);
             }
+        }
+
+        for(int j = 0; j < tampipe; j++){
+            close(fd[j][READ]);
+            close(fd[j][WRITE]);
         }
     }
 }
