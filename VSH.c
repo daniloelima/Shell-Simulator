@@ -87,7 +87,6 @@ void executaComandos(VSH* vsh){
                 }
                 if(i > 0){
                     close(fd[i-1][WRITE]);
-                    close(fd[i][WRITE]);
                     dup2(fd[i-1][READ],STDIN_FILENO);
                 }
 
