@@ -6,6 +6,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define READ 0
+#define WRITE 1
+
 struct vsh{
     Comando** comandos;
     int numComandos;
