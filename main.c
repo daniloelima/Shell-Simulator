@@ -14,7 +14,7 @@ extern void imprimeJacare();
 
 int main(){
     while(1){
-        printf("vsh> ");
+        printf("\033[0;32mvsh>\033[0m");
         VSH* vsh = initVSH();
         leComandos(vsh);
         executaComandos(vsh);

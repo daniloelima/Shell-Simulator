@@ -61,14 +61,38 @@ void executaComandos(VSH* vsh){
             char **args = retornaArgumentos(vsh->comandos[0]);
             execvp(args[0], args);
         }
-        wait(NULL);
+        waitpid(pid,NULL,0);
     }else{ // BACKGROUND
+        int tampipe = vsh->numComandos -1;
+        int fd[tampipe][2];
+        for(int i = 0; i < vsh->numComandos - 1;i++){
+            if(pipe(fd[i]) != 0){
+                perror("Erro ao abrir pipe!");
+                return;
+            }
+        }
+
         for(int i = 0 ; i < vsh->numComandos; i++){
             int pid = fork();
             if(pid == 0){
-                char** args = retornaArgumentos(vsh->comandos[i]);
+                for(int j = 0; j < tampipe; j++){
+                    if (j != i && j != i - 1) {
+                        close(fd[j][READ]);
+                        close(fd[j][WRITE]);
+                    }
+                }
+                if(i > 0){
+                    close(fd[i-1][WRITE]);
+                    close(fd[i][WRITE]);
+                    dup2(fd[i-1][READ],STDIN_FILENO);
+                }
+
+                if(i < tampipe){
+                    close(fd[i][READ]);
+                    dup2(fd[i][WRITE],STDOUT_FILENO);
+                }
+
                 execvp(args[0], args);
-                //botar os pipes
             }
         }
     }
