@@ -32,8 +32,6 @@ static char* novosComandos(){
     novosComandos = strdup(strAux);
     novosComandos[strlen(novosComandos) - 1] = '\0';
 
-    printf("Comandos: %s\n", novosComandos);
-
     return novosComandos;
 }
 
@@ -65,43 +63,56 @@ void executaComandos(VSH* vsh){
             execvp(args[0], args);
         }
         waitpid(pid,NULL,0);
-    }else{ // BACKGROUND
-        int tampipe = vsh->numComandos -1;
-        int fd[tampipe][2];
-        for(int i = 0; i < vsh->numComandos - 1;i++){
-            if(pipe(fd[i]) != 0){
-                perror("Erro ao abrir pipe!\n");
-                return;
-            }
-        }
+    }else { // BACKGROUND
+        int liderSessao = fork(); // FILHO DA VSH
+        if (liderSessao == 0) {
+            int tampipe = vsh->numComandos - 1;
+            int fd[tampipe][2];
 
-        for(int i = 0 ; i < vsh->numComandos; i++){
-            char** args = retornaArgumentos(vsh->comandos[i]);
-            int pid = fork();
-            if(pid == 0){
-                for(int j = 0; j < tampipe; j++){
-                    if (j != i && j != i - 1) {
-                        close(fd[j][READ]);
-                        close(fd[j][WRITE]);
+            for (int i = 0; i < tampipe; i++) {
+                if (pipe(fd[i]) != 0) {
+                    perror("Erro ao abrir pipe!\n");
+                    return;
+                }
+            }
+
+            setsid();
+
+            for (int i = 0; i < vsh->numComandos; i++) {
+                char **args = retornaArgumentos(vsh->comandos[i]);
+
+                int pid = fork(); // NETOS DA VSH
+                if (pid == 0) {
+                    //fecha os pipes que nao vao ser usados
+                    for (int j = 0; j < tampipe; j++) {
+                        if (j != i && j != i - 1) {
+                            close(fd[j][READ]);
+                            close(fd[j][WRITE]);
+                        }
                     }
-                }
-                if(i > 0){
-                    close(fd[i-1][WRITE]);
-                    dup2(fd[i-1][READ],STDIN_FILENO);
-                }
 
-                if(i < tampipe){
-                    close(fd[i][READ]);
-                    dup2(fd[i][WRITE],STDOUT_FILENO);
-                }
+                    //redirecionando o STDIN para o pipe , menos o ultimo
+                    if (i > 0) {
+                        close(fd[i - 1][WRITE]);
+                        dup2(fd[i - 1][READ], STDIN_FILENO);
+                    }
 
-                execvp(args[0], args);
+                    //redirecionando STOUD para o pipe , menos o ultimo processo
+                    if (i < tampipe) {
+                        close(fd[i][READ]);
+                        dup2(fd[i][WRITE], STDOUT_FILENO);
+                    }
+
+                    execvp(args[0], args);
+                }
             }
-        }
+            for (int j = 0; j < tampipe; j++) {
+                close(fd[j][READ]);
+                close(fd[j][WRITE]);
+            }
 
-        for(int j = 0; j < tampipe; j++){
-            close(fd[j][READ]);
-            close(fd[j][WRITE]);
+            for(int i = 0; i < vsh->numComandos; i++) wait(NULL);
+            exit(1);
         }
     }
 }
@@ -113,10 +124,9 @@ void imprimeComandos(VSH* vsh){
 }
 
 void liberaComandos(VSH* vsh){
-    for(int i = 0; i < vsh->numComandos; i++){
+    for(int i = 0; i < vsh->numComandos; i++) {
         free(vsh->comandos[i]);
     }
-
     free(vsh->comandos);
     free(vsh);
 }

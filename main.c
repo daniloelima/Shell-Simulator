@@ -18,6 +18,7 @@ int main(){
         VSH* vsh = initVSH();
         leComandos(vsh);
         executaComandos(vsh);
+        liberaComandos(vsh);
     }
 
     return 0;
