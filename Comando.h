@@ -13,5 +13,6 @@ char** retornaArgumentos(Comando*);
 int retornaNumArgumentos(Comando*);
 void imprimeComando(Comando*);
 void liberaComando(Comando*);
+char* retornaNomeComando(Comando*);
 
 #endif //TRABALHO_1_DE_SISTEMAS_OPERACIONAIS_COMANDO_H

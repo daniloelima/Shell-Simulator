@@ -23,6 +23,4 @@ int main(){
         liberaComandos(vsh);
         reInitComandos(vsh);
     }
-
-    return 0;
 }
