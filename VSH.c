@@ -53,6 +53,7 @@ void adicionaComando(VSH* vsh , Comando* comando){
 }
 
 void leComandos(VSH* listacomandos){
+    
     char* comandos = novosComandos();
     char* str = strtok(comandos, "|");
 
@@ -179,11 +180,12 @@ int executaComandos(VSH* vsh){
 
     if(vsh->numComandos == 1){ // FOREGROUND
         return FOREGROUND(vsh);
-    }else { // BACKGROUND
+    }else if(vsh->numComandos > 1) { // BACKGROUND
         BACKGROUND(vsh);
+        return 0;
     }
 
-    return 0;
+    return 1;
 }
 
 void liberaComandos(VSH* vsh){
