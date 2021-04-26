@@ -4,8 +4,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "TratadoresDeSinal.h"
-#include "TabelaHash.h"
+#include <string.h>
+#include <unistd.h>
+#include <sys/wait.h>
 #include "VSH.h"
 
 #define READ 0
@@ -15,6 +16,7 @@ struct vsh{
     Comando** comandos;
     int numComandos;
     TabelaHash* descendentes;
+
 };
 
 VSH* initVSH(void){
@@ -22,7 +24,8 @@ VSH* initVSH(void){
 
     novoVSH->numComandos = 0;
     novoVSH->comandos = (Comando**) malloc(sizeof(Comando*)*5);
-    novoVSH->descendentes = inicializaHash(7);
+    novoVSH->descendentes = inicializaHash(47);
+
 
     return novoVSH;
 }
@@ -30,10 +33,6 @@ VSH* initVSH(void){
 void reInitComandos(VSH* vsh){
     vsh->numComandos = 0;
     vsh->comandos = (Comando**) malloc(sizeof(Comando*)*5);
-}
-
-TabelaHash* retornaDescendentes(VSH* vsh){
-    return vsh->descendentes;
 }
 
 static char* novosComandos(){
@@ -68,8 +67,8 @@ void leComandos(VSH* listacomandos){
     }
 }
 
-static void liberaMoita(){
-    return;
+static void liberaMoita(VSH* vsh){
+    raise(SIGCHLD);
 }
 
 static void armageddon(VSH* vsh){
@@ -78,29 +77,31 @@ static void armageddon(VSH* vsh){
     liberaHash(vsh->descendentes);
     free(vsh);
     killpg(getpgid(0),SIGKILL);
-    return;
 }
 
-static void FOREGROUND(VSH* vsh){
+static int FOREGROUND(VSH* vsh){
     char* nomeComando = retornaNomeComando(vsh->comandos[0]);
-
+    /*==============PROCESSO PAI==============*/
     if(strcmp("liberamoita", nomeComando) == 0){
-        liberaMoita();
-
+        return 1;
     }else if(strcmp("armageddon", nomeComando) == 0){
         armageddon(vsh);
-
     }else{
-
         int pid = fork();
         if(pid == 0) {
+            /*==============PROCESSO FOREGROUND==============*/
             IgnoraSinaldoUsuarioPfizer();
             char **args = retornaArgumentos(vsh->comandos[0]);
             execvp(args[0], args);
+            /*==============FIM PROCESSO FOREGROUND==============*/
         }
         waitpid(pid,NULL,0);
+
     }
+    /*==============FIM PROCESSO PAI==============*/
+    return 0;
 }
+
 static void BACKGROUND(VSH* vsh){
     int pipeGRUPO[2];
     pipe(pipeGRUPO);
@@ -108,8 +109,9 @@ static void BACKGROUND(VSH* vsh){
     int liderSessao = fork(); // FILHO DA VSH
 
     if (liderSessao == 0) {
+        /*==============PROCESSO MESTRE==============*/
         Aglomeracao();
-
+        //printf("I m the group leader my pid is %d", getpid());
         int tampipe = vsh->numComandos - 1;
         int fd[tampipe][2];
 
@@ -129,6 +131,7 @@ static void BACKGROUND(VSH* vsh){
 
             int pid = fork(); // NETOS DA VSH
             if (pid == 0) {
+                /*==============i PROCESSO BACKGROUND==============*/
                 //fecha os pipes que nao vao ser usados
                 for (int j = 0; j < tampipe; j++) {
                     if (j != i && j != i - 1) {
@@ -149,6 +152,7 @@ static void BACKGROUND(VSH* vsh){
                 }
 
                 execvp(args[0], args);
+                /*==============FIM i PROCESSO BACKGROUND==============*/
             }
         }
         for (int j = 0; j < tampipe; j++) {
@@ -161,33 +165,30 @@ static void BACKGROUND(VSH* vsh){
         }
         retiraHash(vsh->descendentes,getpgid(0));
         exit(1);
+        /*==============FIM PROCESSO MESTRE==============*/
     }
+    /*==============PROCESSO PAI==============*/
     int sid;
     close(pipeGRUPO[WRITE]);
     read(pipeGRUPO[READ],&sid,sizeof(int));
     insereHash(vsh->descendentes,sid);
+    /*==============FIM PROCESSO PAI==============*/
 }
 
-
-void executaComandos(VSH* vsh){
+int executaComandos(VSH* vsh){
 
     if(vsh->numComandos == 1){ // FOREGROUND
-        FOREGROUND(vsh);
-
+        return FOREGROUND(vsh);
     }else { // BACKGROUND
         BACKGROUND(vsh);
     }
-}
 
-void imprimeComandos(VSH* vsh){
-    for(int i = 0; i < vsh->numComandos; i++){
-        imprimeComando(vsh->comandos[i]);
-    }
+    return 0;
 }
 
 void liberaComandos(VSH* vsh){
     for(int i = 0; i < vsh->numComandos; i++) {
-        free(vsh->comandos[i]);
+        liberaComando(vsh->comandos[i]);
     }
     free(vsh->comandos);
 }

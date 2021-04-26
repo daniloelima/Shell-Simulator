@@ -41,20 +41,12 @@ void preencheArgumentos(Comando* c, char* comando){
     c->numArgumentos++;
 }
 
+char* retornaNomeComando(Comando* c){
+    return c->argumentos[0];
+}
+
 char** retornaArgumentos(Comando* c){
     return c->argumentos;
-}
-
-int retornaNumArgumentos(Comando* c){
-    return c->numArgumentos;
-}
-
-void imprimeComando(Comando * c){
-    for(int i = 0; i < c->numArgumentos; i++) {
-        printf("%s ", c->argumentos[i]);
-    }
-
-    printf("Numero de argumentos : %d\n",c->numArgumentos);
 }
 
 void liberaComando(Comando* c){
@@ -64,10 +56,4 @@ void liberaComando(Comando* c){
 
     free(c->argumentos);
     free(c);
-}
-
-char* retornaNomeComando(Comando* c){
-
-    return c->argumentos[0];
-
 }

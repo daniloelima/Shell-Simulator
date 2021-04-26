@@ -4,8 +4,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "Lista.h"
 #include <signal.h>
+#include "Lista.h"
 
 struct celula{
     int pgid;
@@ -68,18 +68,6 @@ void retiraLista(Lista* lista, int pgid){
     }
 
     free(celAux);
-}
-
-int buscaLista(Lista* lista, int pgid){
-    Celula* celAux;
-
-    for(celAux = lista->primCel; celAux != NULL; celAux = celAux->proxCel){
-        if(celAux->pgid == pgid){
-            return celAux->pgid;
-        }
-    }
-
-    return -1;
 }
 
 void percorreListaMatandoGrupos(Lista* lista){

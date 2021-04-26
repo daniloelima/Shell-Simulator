@@ -7,20 +7,39 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
-#include "Comando.h"
 #include "TratadoresDeSinal.h"
 #include "VSH.h"
-#include "TabelaHash.h"
 
 int main(){
-    printf("My PID is %d\n",getpid());
-    VSH* vsh = initVSH();
-    IgnoraSinaldoUsuarioCoronavac();
+
+    //cria um filho para ser a VSH
     while(1){
-        printf("\033[0;32mvsh>\033[0m");
-        leComandos(vsh);
-        executaComandos(vsh);
-        liberaComandos(vsh);
-        reInitComandos(vsh);
+        int vshProcess = fork();
+        if(vshProcess ==0){
+            /*==============PROCESSO DA VSH==============*/
+            printf("VSH PID is %d\n",getpid());
+            VSH* vsh = initVSH();
+            IgnoraSinaldoUsuarioCoronavac();
+            //RODA A VSH
+            while (1) {
+                int flag = 0;
+                printf("\033[0;32mvsh>\033[0m");
+                leComandos(vsh);
+                flag = executaComandos(vsh);
+                liberaComandos(vsh);
+                reInitComandos(vsh);
+                if(flag == 1) break;
+            }
+            /*==============FIM PROCESSO DA VSH==============*/
+            //em caso de liberamoita o VSH se mata para criar um novo
+            raise(SIGKILL);
+        }
+        
+        /*==============PROCESSO PAI==============*/
+
+        waitpid(vshProcess,NULL,0);
+
+        /*==============FIM PROCESSO PAI==============*/
     }
+    return 0;
 }

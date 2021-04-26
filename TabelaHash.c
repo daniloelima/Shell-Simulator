@@ -29,14 +29,9 @@ TabelaHash* inicializaHash(int tamHash){
     return novaTabela;
 }
 
-Lista* retornaListaHash(TabelaHash* hash, int pos){
-    return hash->vet[pos];
-}
-
 void percorreHashMatandoGrupos(TabelaHash* hash){
     for(int i = 0; i < hash->tam;i++){
         if(!listaVazia(hash->vet[i])){
-            printf("Entrou\n");
             percorreListaMatandoGrupos(hash->vet[i]);
         }
     }
@@ -53,6 +48,7 @@ void retiraHash(TabelaHash* hash, int pid){
     int pos = fhash(hash, pid);
     retiraLista(hash->vet[pos],pid);
 }
+
 void liberaHash(TabelaHash* hash){
     for(int i = 0; i < hash->tam; i++){
         liberaLista(hash->vet[i]);

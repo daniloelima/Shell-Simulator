@@ -12,7 +12,6 @@ Lista* inicializaLista();
 int listaVazia(Lista*);
 void insereLista(Lista*, int);
 void retiraLista(Lista*, int);
-int buscaLista(Lista*, int);
 void percorreListaMatandoGrupos(Lista*);
 void imprimeLista(Lista*);
 void liberaLista(Lista*);
