@@ -9,7 +9,5 @@
 
     void IgnoraSinaldoUsuarioCoronavac(void);
     void IgnoraSinaldoUsuarioPfizer(void);
-    void Aglomeracao(void);
-
 
 #endif //TRABALHOVSH_TRATADORESDESINAL_H

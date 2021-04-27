@@ -16,7 +16,7 @@ struct vsh{
     Comando** comandos;
     int numComandos;
     TabelaHash* descendentes;
-
+    int numZombies;
 };
 
 VSH* initVSH(void){
@@ -25,6 +25,7 @@ VSH* initVSH(void){
     novoVSH->numComandos = 0;
     novoVSH->comandos = (Comando**) malloc(sizeof(Comando*)*5);
     novoVSH->descendentes = inicializaHash(47);
+    novoVSH->numZombies = 0;
 
 
     return novoVSH;
@@ -69,7 +70,10 @@ void leComandos(VSH* listacomandos){
 }
 
 static void liberaMoita(VSH* vsh){
-    raise(SIGCHLD);
+    for(int i = 0;i < vsh->numZombies;i++)
+        waitpid(-1,NULL,WNOHANG);
+
+    vsh->numZombies = 0;
 }
 
 static void armageddon(VSH* vsh){
@@ -80,11 +84,11 @@ static void armageddon(VSH* vsh){
     killpg(getpgid(0),SIGKILL);
 }
 
-static int FOREGROUND(VSH* vsh){
+static void FOREGROUND(VSH* vsh){
     char* nomeComando = retornaNomeComando(vsh->comandos[0]);
     /*==============PROCESSO PAI==============*/
     if(strcmp("liberamoita", nomeComando) == 0){
-        return 1;
+        liberaMoita(vsh);
     }else if(strcmp("armageddon", nomeComando) == 0){
         armageddon(vsh);
     }else{
@@ -100,7 +104,6 @@ static int FOREGROUND(VSH* vsh){
 
     }
     /*==============FIM PROCESSO PAI==============*/
-    return 0;
 }
 
 static void BACKGROUND(VSH* vsh){
@@ -111,8 +114,7 @@ static void BACKGROUND(VSH* vsh){
 
     if (liderSessao == 0) {
         /*==============PROCESSO MESTRE==============*/
-        Aglomeracao();
-        //printf("I m the group leader my pid is %d", getpid());
+
         int tampipe = vsh->numComandos - 1;
         int fd[tampipe][2];
 
@@ -124,6 +126,7 @@ static void BACKGROUND(VSH* vsh){
         }
 
         int sid = setsid();
+
         close(pipeGRUPO[READ]);
         write(pipeGRUPO[WRITE],&sid,sizeof(int));
 
@@ -131,6 +134,7 @@ static void BACKGROUND(VSH* vsh){
             char **args = retornaArgumentos(vsh->comandos[i]);
 
             int pid = fork(); // NETOS DA VSH
+
             if (pid == 0) {
                 /*==============i PROCESSO BACKGROUND==============*/
                 //fecha os pipes que nao vao ser usados
@@ -162,9 +166,18 @@ static void BACKGROUND(VSH* vsh){
         }
 
         for(int i = 0; i < vsh->numComandos; i++){
-            wait(NULL);
+            int status = 0;
+            wait(&status);
+            if(WIFSIGNALED(status)){
+                if(WTERMSIG(status) == SIGUSR1 || WTERMSIG(status) == SIGUSR2){
+                    killpg(getpgid(0),SIGKILL);
+                }
+            }
         }
+
+
         retiraHash(vsh->descendentes,getpgid(0));
+
         exit(1);
         /*==============FIM PROCESSO MESTRE==============*/
     }
@@ -173,19 +186,19 @@ static void BACKGROUND(VSH* vsh){
     close(pipeGRUPO[WRITE]);
     read(pipeGRUPO[READ],&sid,sizeof(int));
     insereHash(vsh->descendentes,sid);
+    vsh->numZombies++;
     /*==============FIM PROCESSO PAI==============*/
 }
 
-int executaComandos(VSH* vsh){
+void executaComandos(VSH* vsh){
 
     if(vsh->numComandos == 1){ // FOREGROUND
-        return FOREGROUND(vsh);
+        FOREGROUND(vsh);
     }else if(vsh->numComandos > 1) { // BACKGROUND
         BACKGROUND(vsh);
-        return 0;
+
     }
 
-    return 1;
 }
 
 void liberaComandos(VSH* vsh){

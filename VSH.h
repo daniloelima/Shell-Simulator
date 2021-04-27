@@ -14,7 +14,7 @@
     VSH* initVSH(void);
     void adicionaComando(VSH* vsh , Comando* comando);
     void leComandos(VSH* vsh);
-    int executaComandos(VSH* vsh);
+    void executaComandos(VSH* vsh);
     void liberaComandos(VSH* vsh);
     void reInitComandos(VSH* vsh);
 
