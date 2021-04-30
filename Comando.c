@@ -7,18 +7,25 @@
 #include <string.h>
 #include "Comando.h"
 
+#define MAX_ARG 10
+
 struct comando{
     char** argumentos;
     int numArgumentos;
 };
 
+// Inicializa um comando (assim como seus argumentos)
 Comando* inicializaComando(){
     Comando* novoComando = (Comando*) malloc(sizeof(Comando));
+    if(novoComando == NULL){
+        perror("Erro na alocacao de um novo comando\n");
+        exit(1);
+    }
 
-    novoComando->argumentos = (char**) malloc(sizeof(char*)*30);
-
-    for(int i = 0; i < 30; i++){
-        novoComando->argumentos[i] = (char*) malloc(sizeof(char)*50);
+    novoComando->argumentos = (char**) malloc(sizeof(char*)*MAX_ARG);
+    if(novoComando->argumentos == NULL){
+        printf("Erro na alocação dos argumentos\n");
+        exit(1);
     }
 
     novoComando->numArgumentos = 0;
@@ -26,6 +33,7 @@ Comando* inicializaComando(){
     return novoComando;
 }
 
+// Preenche os argumentos do comando, no maximo 10
 void preencheArgumentos(Comando* c, char* comando){
     char* buffer;
     char* aux = strtok_r(comando," ",&buffer);
@@ -49,6 +57,7 @@ char** retornaArgumentos(Comando* c){
     return c->argumentos;
 }
 
+// Libera a memoria utilizada pelo comando
 void liberaComando(Comando* c){
     for(int i = 0; i < c->numArgumentos; i++){
         free(c->argumentos[i]);

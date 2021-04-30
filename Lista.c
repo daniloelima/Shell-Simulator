@@ -7,6 +7,10 @@
 #include <signal.h>
 #include "Lista.h"
 
+// Implementacao de uma lista simplesmente encadeada sem sentinela
+// Cada celula ira guardar um pgid
+// O pgid sera util para matar um grupo inteiro de processos de uma so vez
+
 struct celula{
     int pgid;
     Celula* proxCel;
@@ -19,6 +23,10 @@ struct lista{
 
 Lista* inicializaLista(){
     Lista* novaLista = (Lista*) malloc(sizeof(Lista));
+    if(novaLista == NULL){
+        perror("Erro na alocação da lista\n");
+        exit(1);
+    }
 
     novaLista->primCel = NULL;
     novaLista->ultCel = NULL;
@@ -33,6 +41,10 @@ int listaVazia(Lista* lista){
 
 void insereLista(Lista* lista, int pgid){
     Celula* novaCelula = (Celula*) malloc(sizeof(Celula));
+    if(novaCelula == NULL){
+        perror("Erro na alocação da celula\n");
+        exit(1);
+    }
 
     novaCelula->pgid = pgid;
     novaCelula->proxCel = NULL;
@@ -70,6 +82,7 @@ void retiraLista(Lista* lista, int pgid){
     free(celAux);
 }
 
+// Percorre cada celula da lista e, para cada celula, envia um comando kill para o grupo armazenado nela
 void percorreListaMatandoGrupos(Lista* lista){
     Celula* celAux;
 

@@ -3,25 +3,19 @@
 //
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/wait.h>
 #include "TratadoresDeSinal.h"
 #include "VSH.h"
 
-
 int main(){
-    /*==============PROCESSO DA VSH==============*/
-    IgnoraSinaldoUsuarioCoronavac();
-    VSH* vsh = initVSH();
-    //RODA A VSH
-    while (1) {
-        printf("\033[0;32mvsh>\033[0m");
-        leComandos(vsh);
-        executaComandos(vsh);
-        liberaComandos(vsh);
-        reInitComandos(vsh);
-    }
+    IgnoraSinaldoUsuarioCoronavac(); //Cria o tratador que lida com os sinais SIGUSR1 e SIGUSR2
+    VSH* vsh = initVSH(); //Inicializa a estrutura que contem os principais dados durante a execucao do programa
 
+    //Executa o programa até a chamada do comando "armageddon"
+    while (1) {
+        printf("\033[0;32mvsh>\033[0m"); // Imprime o prompt "vsh>"
+        leComandos(vsh); // Le os comandos inseridos pelo usuario
+        executaComandos(vsh); // Executa os comandos lidos pelo usuario
+        liberaComandos(vsh); // Libera os comandos depois de terem sido executados
+        reInitComandos(vsh); // Reinicializa a estrutura para uma nova leitura de comandos
+    }
 }
