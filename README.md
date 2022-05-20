@@ -1,2 +1,2 @@
 # Trabalho-1-de-Sistemas-Operacionais
-Desenvolvimento de um shell (vaccine shell) para por em prática conceitos de manipulação de processos. Desenvolvido em C por Danilo, Enzo e Vitor.
+Development of a shell (vaccine shell) to practice concepts of process manipulation. Developed in C by @daniloelima, @enzocussuol and @VitorBonella.
